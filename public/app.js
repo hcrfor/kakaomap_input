@@ -245,6 +245,12 @@ async function handleExcelUpload(file) {
     els.limitWarningBox.classList.toggle('hidden', data.validCount <= 1000);
 
     renderPreviewTable(state.parsedItems);
+    if (!state.isRunning) {
+      updatePhaseBanner({
+        phase: 'idle',
+        message: '그룹 설정과 엑셀 파일을 선택한 뒤 시작 버튼을 누르면 카카오 로그인 화면이 열립니다. 로그인만 수동으로 완료해 주세요!'
+      });
+    }
     updateStartButtonState();
     appendLog('success', `엑셀 분석 완료! 등록 가능한 좌표 ${data.validCount}건을 불러왔습니다.`);
   } catch (err) {
@@ -331,7 +337,10 @@ function updatePhaseBanner(payload) {
   els.phaseBannerTitle.textContent = bannerMeta.title;
   els.phaseBannerDesc.textContent = message || '';
 
-  if (typeof total === 'number' && total > 0) {
+  if (phase === 'idle') {
+    els.progressArea.classList.add('hidden');
+    els.progressBar.style.width = '0%';
+  } else if (typeof total === 'number' && total > 0) {
     els.progressArea.classList.remove('hidden');
     const cur = current || 0;
     const pct = Math.min(100, Math.round((cur / total) * 100));

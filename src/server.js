@@ -23,11 +23,19 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // SSE(Server-Sent Events) 구독 클라이언트 목록 관리
 const sseClients = new Set();
-let currentState = {
+const INITIAL_IDLE_STATE = {
   isRunning: false,
   phase: 'idle',
-  message: '대기 중'
+  message: '그룹 설정과 엑셀 파일을 선택한 뒤 시작 버튼을 누르면 카카오 로그인 화면이 열립니다. 로그인만 수동으로 완료해 주세요!'
 };
+let currentState = { ...INITIAL_IDLE_STATE };
+
+/**
+ * 새로 접속하거나 새로고침한 클라이언트에는 현재 진행 중인 작업이 있을 때만 진행 상태를 전달합니다.
+ */
+function getInitialClientState() {
+  return currentState.isRunning ? currentState : INITIAL_IDLE_STATE;
+}
 
 function broadcastEvent(eventName, payload) {
   if (eventName === 'status') {
@@ -56,7 +64,7 @@ app.get('/api/meta', (req, res) => {
   res.json({
     icons: KAKAO_ICONS,
     colors: KAKAO_COLORS,
-    state: currentState
+    state: getInitialClientState()
   });
 });
 
@@ -70,7 +78,7 @@ app.get('/api/events', (req, res) => {
   res.flushHeaders?.();
 
   sseClients.add(res);
-  res.write(`event: status\ndata: ${JSON.stringify(currentState)}\n\n`);
+  res.write(`event: status\ndata: ${JSON.stringify(getInitialClientState())}\n\n`);
 
   const keepAlive = setInterval(() => {
     try {
