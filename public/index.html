@@ -1,0 +1,273 @@
+<!-- 파일 경로: public/index.html -->
+<!-- 역할: 카카오맵 엑셀 즐겨찾기 자동 등록 웹 애플리케이션의 메인 UI 구조를 정의합니다. -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>카카오맵 엑셀 즐겨찾기 자동 등록기</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23fee500'/%3E%3Cpath d='M12 4.5c-3.3 0-6 2.7-6 6 0 4 5.2 8.7 5.5 9a.75.75 0 0 0 1 0c.3-.3 5.5-5 5.5-9 0-3.3-2.7-6-6-6zm0 8.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4z' fill='%233c1e1e'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="brand-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+            <path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 6.84 11.39 7.13 11.65a1.3 1.3 0 0 0 1.74 0C13.16 21.39 20 15.25 20 10c0-4.42-3.58-8-8-8zm0 11.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4z"/>
+          </svg>
+        </div>
+        <div>
+          <h1>카카오맵 즐겨찾기 자동 등록</h1>
+          <p class="subtitle">엑셀의 <code>번호_유형_관리</code>, <code>위도</code>, <code>경도</code> 좌표를 카카오맵 그룹에 일괄 저장합니다</p>
+        </div>
+      </div>
+      <div class="header-status" id="headerConnectionBadge">
+        <span class="dot"></span>
+        <span id="headerStatusText">서버 연결됨</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-layout">
+    <!-- 좌측 컬럼: 1단계 그룹 설정 + 2단계 엑셀 업로드 + 3단계 실행 제어 -->
+    <div class="left-column">
+      <!-- STEP 1: 그룹 설정 -->
+      <section class="card">
+        <div class="card-header">
+          <span class="step-pill">STEP 1</span>
+          <h2>즐겨찾기 그룹 · 모양 · 색상 설정</h2>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="groupNameInput">카카오맵 즐겨찾기 그룹명 <span class="required">*</span></label>
+            <input
+              type="text"
+              id="groupNameInput"
+              class="text-input"
+              placeholder="예: 자체검증(1팀)"
+              maxlength="40"
+            />
+            <p class="help-text">동일한 이름의 그룹이 이미 있으면 기존 그룹에 이어서 등록됩니다.</p>
+          </div>
+
+          <div class="form-group">
+            <label>공개 허용 범위</label>
+            <div class="segmented-control" id="privacyControl">
+              <button type="button" class="seg-btn active" data-privacy="P">비공개</button>
+              <button type="button" class="seg-btn" data-privacy="U">링크공개</button>
+              <button type="button" class="seg-btn" data-privacy="O">공개</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>즐겨찾기 그룹 모양 (카카오맵 10종)</label>
+          <div class="icon-grid" id="iconGrid"></div>
+        </div>
+
+        <div class="form-group">
+          <label>즐겨찾기 마커 색상 (카카오맵 7종)</label>
+          <div class="color-row">
+            <div class="color-palette" id="colorPalette"></div>
+            <div class="marker-preview" id="markerPreview">
+              <span class="preview-label">미리보기</span>
+              <span class="preview-chip" id="previewChip">
+                <span class="preview-icon-circle" id="previewIconCircle"></span>
+                <span id="previewGroupText">새 그룹</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 2: 엑셀 파일 업로드 -->
+      <section class="card">
+        <div class="card-header">
+          <span class="step-pill">STEP 2</span>
+          <h2>엑셀 파일 선택</h2>
+        </div>
+
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" hidden />
+          <div class="dropzone-icon">📊</div>
+          <div class="dropzone-text">
+            <strong>엑셀 파일(.xlsx, .xls, .csv)을 끌어다 놓거나 클릭해서 선택하세요</strong>
+            <span>필수 열: <code>번호_유형_관리</code>, <code>위도</code>, <code>경도</code></span>
+          </div>
+          <button type="button" class="btn btn-secondary" id="selectFileBtn">파일 찾아보기</button>
+        </div>
+
+        <div class="file-summary hidden" id="fileSummary">
+          <div class="file-meta">
+            <span class="file-name" id="fileNameText"></span>
+            <span class="sheet-name" id="sheetNameText"></span>
+          </div>
+          <div class="stat-pills">
+            <span class="stat-pill total" id="totalCountPill">전체 0건</span>
+            <span class="stat-pill valid" id="validCountPill">정상 0건</span>
+            <span class="stat-pill invalid hidden" id="invalidCountPill">오류 0건</span>
+          </div>
+        </div>
+
+        <div class="alert-box warning hidden" id="limitWarningBox">
+          ⚠️ 카카오맵은 하나의 즐겨찾기 그룹에 최대 <strong>1,000개</strong>까지 저장할 수 있습니다. 현재 데이터 중 앞 1,000건만 등록되거나 초과 시 중단될 수 있습니다.
+        </div>
+      </section>
+
+      <!-- STEP 3: 로그인 & 자동 등록 실행 -->
+      <section class="card">
+        <div class="card-header">
+          <span class="step-pill">STEP 3</span>
+          <h2>카카오 로그인 및 자동 등록</h2>
+        </div>
+
+        <div class="login-guide-banner" id="phaseBanner">
+          <div class="banner-icon" id="phaseBannerIcon">🔐</div>
+          <div>
+            <strong id="phaseBannerTitle">실행 준비 완료</strong>
+            <p id="phaseBannerDesc">그룹 설정과 엑셀 파일을 선택한 뒤 시작 버튼을 누르면 카카오 로그인 화면이 열립니다. 로그인만 수동으로 완료해 주세요!</p>
+          </div>
+        </div>
+
+        <div class="ready-checklist" id="readyChecklist">
+          <div class="check-item" id="checkGroupItem">
+            <span class="check-dot">○</span>
+            <span id="checkGroupText">STEP 1: 즐겨찾기 그룹명을 입력해 주세요</span>
+          </div>
+          <div class="check-item" id="checkExcelItem">
+            <span class="check-dot">○</span>
+            <span id="checkExcelText">STEP 2: 엑셀 파일을 선택해 주세요</span>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <div class="speed-select-wrap">
+            <label for="delaySelect">등록 속도</label>
+            <select id="delaySelect" class="select-input">
+              <option value="400">빠름 (0.4초 간격)</option>
+              <option value="700" selected>보통 (0.7초 간격 · 권장)</option>
+              <option value="1200">안전 (1.2초 간격 · 대용량 권장)</option>
+            </select>
+          </div>
+          <div class="btn-group">
+            <button type="button" class="btn btn-primary" id="startBtn">
+              카카오맵 로그인 &amp; 자동 등록 시작
+            </button>
+            <button type="button" class="btn btn-danger hidden" id="stopBtn">
+              작업 중단
+            </button>
+          </div>
+        </div>
+
+        <div class="progress-area hidden" id="progressArea">
+          <div class="progress-top">
+            <span id="progressLabel">0 / 0 처리됨</span>
+            <span id="progressPercent">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div class="progress-counters">
+            <span class="cnt success">성공 <strong id="cntSuccess">0</strong></span>
+            <span class="cnt skipped">중복 건너뜀 <strong id="cntSkipped">0</strong></span>
+            <span class="cnt failed">실패 <strong id="cntFailed">0</strong></span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 우측 컬럼: 데이터 미리보기 테이블 + 실시간 로그 -->
+    <div class="right-column">
+      <section class="card table-card">
+        <div class="card-header space-between">
+          <div class="header-left">
+            <span class="step-pill dark">PREVIEW</span>
+            <h2>좌표 데이터 및 등록 상태</h2>
+          </div>
+          <span class="badge-muted" id="tableCountBadge">데이터 없음</span>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 48px;">#</th>
+                <th>등록 이름 (번호_유형_관리)</th>
+                <th style="width: 112px;">위도</th>
+                <th style="width: 112px;">경도</th>
+                <th style="width: 108px;">상태</th>
+              </tr>
+            </thead>
+            <tbody id="previewTableBody">
+              <tr>
+                <td colspan="5" class="empty-cell">
+                  엑셀 파일을 업로드하면 <code>번호_유형_관리</code>, <code>위도</code>, <code>경도</code> 목록이 여기에 표시됩니다.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card log-card">
+        <div class="card-header space-between">
+          <div class="header-left">
+            <span class="step-pill dark">LOG</span>
+            <h2>실시간 작업 로그</h2>
+          </div>
+          <button type="button" class="btn-text" id="clearLogBtn">로그 지우기</button>
+        </div>
+        <div class="log-console" id="logConsole">
+          <div class="log-line info">
+            <span class="log-time">[대기]</span>
+            <span>그룹명·모양·색상과 엑셀 파일을 선택한 뒤 시작 버튼을 눌러주세요.</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- 작업 완료 알림 모달 -->
+  <div class="modal-backdrop hidden" id="completionModal" role="dialog" aria-modal="true" aria-labelledby="completionModalTitle">
+    <div class="modal-card">
+      <div class="modal-icon" id="completionModalIcon">🎉</div>
+      <h3 id="completionModalTitle">즐겨찾기 등록이 완료되었습니다!</h3>
+      <p class="modal-desc" id="completionModalDesc"></p>
+
+      <div class="modal-stats">
+        <div class="modal-stat-box total">
+          <span>전체</span>
+          <strong id="modalTotalCount">0</strong>
+        </div>
+        <div class="modal-stat-box success">
+          <span>성공</span>
+          <strong id="modalSuccessCount">0</strong>
+        </div>
+        <div class="modal-stat-box skipped">
+          <span>건너뜀</span>
+          <strong id="modalSkippedCount">0</strong>
+        </div>
+        <div class="modal-stat-box failed">
+          <span>실패</span>
+          <strong id="modalFailedCount">0</strong>
+        </div>
+      </div>
+
+      <div class="modal-failed-list hidden" id="modalFailedSection">
+        <div class="failed-title">실패한 항목 내역</div>
+        <ul id="modalFailedList"></ul>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary hidden" id="retryFailedBtn">실패한 항목만 다시 등록</button>
+        <button type="button" class="btn btn-primary" id="closeModalBtn">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
