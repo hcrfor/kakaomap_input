@@ -23,9 +23,14 @@
           <p class="subtitle">엑셀의 <code>번호_유형_관리</code>, <code>위도</code>, <code>경도</code> 좌표를 카카오맵 그룹에 일괄 저장합니다</p>
         </div>
       </div>
-      <div class="header-status" id="headerConnectionBadge">
-        <span class="dot"></span>
-        <span id="headerStatusText">서버 연결됨</span>
+      <div class="header-actions">
+        <button type="button" class="btn btn-guide" id="openGuideBtn">
+          <span class="guide-icon">📖</span> 처음 설치 &amp; 사용 가이드
+        </button>
+        <div class="header-status" id="headerConnectionBadge">
+          <span class="dot"></span>
+          <span id="headerStatusText">서버 연결됨</span>
+        </div>
       </div>
     </div>
   </header>
@@ -229,6 +234,83 @@
       </section>
     </div>
   </main>
+
+  <!-- 처음 설치 및 사용 가이드 모달 -->
+  <div class="modal-backdrop hidden" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideModalTitle">
+    <div class="modal-card modal-guide-card">
+      <div class="guide-modal-header">
+        <div class="guide-header-title">
+          <span class="guide-badge-pill">초보자 안내</span>
+          <h3 id="guideModalTitle">💻 다른 PC 설치 &amp; 실행 방법 총정리</h3>
+        </div>
+        <button type="button" class="btn-close-modal" id="closeGuideTopBtn" aria-label="닫기">✕</button>
+      </div>
+
+      <div class="guide-modal-body">
+        <!-- 1단계: 사전 준비 -->
+        <div class="guide-step-card">
+          <div class="step-num-badge">1</div>
+          <div class="step-content">
+            <h4>사전 준비: Node.js 설치 (필수, 최초 1회)</h4>
+            <p>이 프로그램은 <strong>Node.js</strong> 엔진 위에서 작동합니다. PC에 아직 없다면 먼저 설치해 주세요.</p>
+            <div class="guide-sub-box">
+              <ol>
+                <li><a href="https://nodejs.org/" target="_blank" rel="noopener noreferrer">nodejs.org</a>에 접속합니다.</li>
+                <li><strong>[Get Node.js®]</strong> (또는 초록색 <strong>LTS 버전</strong>) 버튼을 클릭해 설치 파일을 다운로드합니다.</li>
+                <li>다운로드된 파일을 실행하고 옵션 변경 없이 <strong>[Next] → [Install]</strong> 로 기본 설치를 마칩니다.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2단계: 폴더 복사 및 실행 -->
+        <div class="guide-step-card">
+          <div class="step-num-badge">2</div>
+          <div class="step-content">
+            <h4>프로그램 실행: run.bat 더블클릭</h4>
+            <p>프로그램 폴더(예: <code>C:\kakaomap_input</code>)로 이동하여 <strong><code>run.bat</code></strong> 파일을 마우스로 더블클릭합니다.</p>
+            <div class="guide-tip-box">
+              <strong>💡 팁:</strong> 최초 실행 시 필요한 부품을 인터넷에서 1~2분간 자동으로 설치한 뒤, 브라우저에서 <code>http://localhost:3000</code> 화면이 자동으로 열립니다.
+            </div>
+          </div>
+        </div>
+
+        <!-- 3단계: 자주 묻는 오류 & 해결법 -->
+        <div class="guide-step-card highlight">
+          <div class="step-num-badge alert">!</div>
+          <div class="step-content">
+            <h4>자주 발생하는 오류 &amp; 해결 방법 (트러블슈팅)</h4>
+            
+            <div class="trouble-item">
+              <span class="trouble-q">Q1. 회사/보안망에서 <code>SELF_SIGNED_CERT_IN_CHAIN</code> 에러가 날 때</span>
+              <p class="trouble-a">
+                사내 방화벽/보안 인증서 때문에 다운로드가 차단된 경우입니다. 터미널(CMD) 창에서 아래 명령어 1줄을 치고 엔터를 누른 뒤 다시 <code>npm install</code>을 실행하세요.
+                <code>npm config set strict-ssl false</code>
+              </p>
+            </div>
+
+            <div class="trouble-item">
+              <span class="trouble-q">Q2. 한글 띄어쓰기 경로로 인한 에러가 날 때</span>
+              <p class="trouble-a">
+                폴더 경로에 한글 띄어쓰기(예: <code>D:\한 성 안\산 림\...</code>)가 길면 설치 오류가 날 수 있습니다. 폴더를 <strong><code>C:\kakaomap_input</code></strong> 처럼 단순한 영문 경로로 옮겨서 <code>run.bat</code>를 실행해 주세요.
+              </p>
+            </div>
+
+            <div class="trouble-item">
+              <span class="trouble-q">Q3. "이 페이지에 연결할 수 없습니다"가 뜰 때</span>
+              <p class="trouble-a">
+                검은색 콘솔 창이 닫혀서 서버가 꺼진 상태입니다. <strong>검은색 콘솔 창은 끄지 말고 최소화</strong>해 두어야 웹 화면이 정상 동작합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" id="closeGuideBtn">확인했습니다</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 작업 완료 알림 모달 -->
   <div class="modal-backdrop hidden" id="completionModal" role="dialog" aria-modal="true" aria-labelledby="completionModalTitle">

@@ -82,7 +82,11 @@ const els = {
   checkGroupItem: document.getElementById('checkGroupItem'),
   checkGroupText: document.getElementById('checkGroupText'),
   checkExcelItem: document.getElementById('checkExcelItem'),
-  checkExcelText: document.getElementById('checkExcelText')
+  checkExcelText: document.getElementById('checkExcelText'),
+  openGuideBtn: document.getElementById('openGuideBtn'),
+  guideModal: document.getElementById('guideModal'),
+  closeGuideBtn: document.getElementById('closeGuideBtn'),
+  closeGuideTopBtn: document.getElementById('closeGuideTopBtn')
 };
 
 function appendLog(level, message, timeText) {
@@ -310,6 +314,14 @@ function hideCompletionModal() {
   els.completionModal.classList.add('hidden');
 }
 
+function showGuideModal() {
+  els.guideModal.classList.remove('hidden');
+}
+
+function hideGuideModal() {
+  els.guideModal.classList.add('hidden');
+}
+
 function updatePhaseBanner(payload) {
   const { phase, message, current, total, summary } = payload;
 
@@ -512,6 +524,16 @@ function bindEvents() {
   });
 
   els.startBtn.addEventListener('click', () => startAutomation(state.parsedItems));
+
+  els.openGuideBtn.addEventListener('click', showGuideModal);
+  els.closeGuideBtn.addEventListener('click', hideGuideModal);
+  els.closeGuideTopBtn.addEventListener('click', hideGuideModal);
+
+  els.guideModal.addEventListener('click', (e) => {
+    if (e.target === els.guideModal) {
+      hideGuideModal();
+    }
+  });
 
   els.closeModalBtn.addEventListener('click', hideCompletionModal);
 
